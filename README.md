@@ -1,6 +1,6 @@
 
 ## YBO
-A custom Kodi plugin for personal videos served over HTTP.
+A simple Kodi plugin for videos served over HTTP.
 
 
 

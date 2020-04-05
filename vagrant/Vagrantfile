@@ -1,14 +1,15 @@
-Vagrant.configure("2") do |config|
-  #config.vm.box = "kodi"
+Vagrant.configure("2") do |config| #config.vm.box = "kodi"
   config.vm.box = "archlinux/archlinux"
   #config.vm.synced_folder ".", "/vagrant", disabled: true
   #config.vm.synced_folder "files", "/tmp/files", type: "rsync"
   config.vm.synced_folder "files", "/tmp/files"
+  config.vm.synced_folder "../plugin.video.ybo", "/tmp/files/plugin.video.ybo"
   config.vm.provision "shell", inline: <<-SHELL
       pacman -Syu --noconfirm
       #cat /tmp/vagrant/hosts >> /etc/hosts
 	  #cd /tmp/vagrant/scripts
   SHELL
+  # The next directive requires the vagrant-disksize plugin
   config.disksize.size = '20GB'
   config.vm.hostname = 'kodi'
   config.vm.define "kodi" do |build|
@@ -21,10 +22,13 @@ Vagrant.configure("2") do |config|
     build.vm.provision "shell", inline: <<-SHELL
         echo "yarp"
 		#pacman -Syu
-		pacman -S kodi git base-devel vi  --noconfirm
+		pacman -S kodi git base-devel vi lsof strace --noconfirm
 		#git clone https://aur.archlinux.org/kodi-standalone-service.git
 		#(cd kodi-standalone-service && makepkg -si && cd ..)
 		pacman -U /vagrant/files/kodi-standalone-service-1.102-1-x86_64.pkg.tar.xz --noconfirm
+		#cp -R /tmp/files/script.module.requests /usr/share/kodi/addons/
+		cp -R /tmp/files/plugin.video.ybo /usr/share/kodi/addons/
+		#cp /tmp/files/plugin.video.ybo.zip /var/lib/kodi/
 		systemctl start kodi.service 
     SHELL
   end

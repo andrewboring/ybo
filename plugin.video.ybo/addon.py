@@ -5,8 +5,10 @@
 import sys
 import os
 import requests
-#from urllib.parse import quote
+# use urllib.parse for Python 3
 #import urllib.parse
+# use urllib for Python 2
+import urllib
 import xbmcgui
 import xbmcplugin
 
@@ -25,7 +27,7 @@ xbmcplugin.setContent(addon_handle, 'movies')
 #    print("Link: " + link)
 
 for item in items.splitlines():
-    link = source_url + item
+    link = source_url + urllib.quote(item)
     name = os.path.splitext(item)[0]
     li = xbmcgui.ListItem(name, iconImage='DefaultVideo.png')
     xbmcplugin.addDirectoryItem(handle=addon_handle, url=link, listitem=li)

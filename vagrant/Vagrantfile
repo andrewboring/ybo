@@ -1,35 +1,59 @@
 Vagrant.configure("2") do |config| #config.vm.box = "kodi"
-  config.vm.box = "archlinux/archlinux"
-  #config.vm.synced_folder ".", "/vagrant", disabled: true
-  #config.vm.synced_folder "files", "/tmp/files", type: "rsync"
-  config.vm.synced_folder "files", "/tmp/files"
-  config.vm.synced_folder "../plugin.video.ybo", "/tmp/files/plugin.video.ybo"
-  config.vm.provision "shell", inline: <<-SHELL
-      pacman -Syu --noconfirm
-      #cat /tmp/vagrant/hosts >> /etc/hosts
-	  #cd /tmp/vagrant/scripts
-  SHELL
+  config.vm.synced_folder ".", "/vagrant", disabled: true
   # The next directive requires the vagrant-disksize plugin
-  config.disksize.size = '20GB'
-  config.vm.hostname = 'kodi'
-  config.vm.define "kodi" do |build|
-    build.vm.provider "virtualbox" do |vb|
+  #config.disksize.size = '20GB'
+  config.vm.define "kodi" do |kodi|
+    kodi.vm.box = "archlinux/archlinux"
+    kodi.vm.hostname = "kodi"
+	kodi.vm.network "private_network", ip: "192.168.56.10" kodi.vm.synced_folder "files-kodi", "/tmp/files", type: "rsync"
+    kodi.vm.synced_folder "../plugin.video.ybo", "/tmp/files/plugin.video.ybo", type: "rsync"
+    kodi.vm.provider "virtualbox" do |vb|
       vb.gui = true
       vb.memory = "2048"
 	  vb.cpus = 2
 	  #vb.disksize.size = '30GB'
     end
-    build.vm.provision "shell", inline: <<-SHELL
-        echo "yarp"
-		#pacman -Syu
-		pacman -S kodi git base-devel vi lsof strace --noconfirm
-		#git clone https://aur.archlinux.org/kodi-standalone-service.git
-		#(cd kodi-standalone-service && makepkg -si && cd ..)
-		pacman -U /vagrant/files/kodi-standalone-service-1.102-1-x86_64.pkg.tar.xz --noconfirm
-		#cp -R /tmp/files/script.module.requests /usr/share/kodi/addons/
-		cp -R /tmp/files/plugin.video.ybo /usr/share/kodi/addons/
-		#cp /tmp/files/plugin.video.ybo.zip /var/lib/kodi/
-		systemctl start kodi.service 
+    kodi.vm.provision "shell", inline: <<-SHELL
+      echo "yarp"
+      pacman -Syu --noconfirm
+	  pacman -S kodi git base-devel vi lsof strace --noconfirm
+	  #git clone https://aur.archlinux.org/kodi-standalone-service.git
+   	  #(cd kodi-standalone-service && makepkg -si && cd ..)
+	  pacman -U /vagrant/files/kodi-standalone-service-1.102-1-x86_64.pkg.tar.xz --noconfirm
+	  cp -R /tmp/files/plugin.video.ybo /usr/share/kodi/addons/
+	  #cp /tmp/files/plugin.video.ybo.zip /var/lib/kodi/
+	  systemctl start kodi.service 
     SHELL
+  end
+  config.vm.define "build-nginx" do |b|
+	#s.vm.box = "centos/7"
+	b.vm.box = "archlinux/archlinux"
+ 	b.vm.network "private_network", ip: "192.168.56.101"
+	b.vm.synced_folder  "files-nginx", "/tmp/files"
+	b.vm.synced_folder  "../nginx-rtmp/", "/tmp/files/nginx-rtmp"
+	b.vm.provider "virtualbox" do |vb|
+	  vb.gui = false
+	  vb.memory = "1024"
+	  vb.cpus = 1
+	  #vb.disksize.size = '20GB'
+	end
+	b.vm.provision "shell", inline: <<-SHELL
+	  #yum update -y
+	  #yum install epel-release -y
+	  #yum install -y nginx nginx-all-modules
+	  #systemctl enable nginx
+	  #mv /tmp/files/nginx.conf /etc/nginx/nginx.conf
+      #mv /tmp/files/ngx_rtmp_module-1.16.1.so /usr/lib64/nginx/modules/ngx_rtmp_module.so	  
+	  #mv /tmp/files/ngx_rtmp_module.conf /usr/share/nginx/conf.d/ngx_rtmp_module.conf
+	  mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig
+	  echo 'Server = http://mirrors.liquidweb.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+	  pacman -Syu --noconfirm
+	  pacman -S base-devel --noconfirm
+	  cd /tmp/files/nginx-rtmp
+	  su vagrant -c 'makepkg -sf --noconfirm'
+	  echo "nginx-rtmp built. If you have the vagrant-scp plugin, You can use:" 
+	  echo "    'vagrant scp build-nginx:/tmp/files/nginx-rtmp/nginx-rtmp-1.12.2-3-x86_64.pkg.tar.xz .'"
+      echo "to retrieve the file."
+	SHELL
   end
 end

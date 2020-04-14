@@ -1,0 +1,35 @@
+pkgbase = nginx-rtmp
+	pkgdesc = NGINX-based Media Streaming Server
+	pkgver = 1.12.2
+	pkgrel = 3
+	url = https://nginx-rtmp.blogspot.com/
+	install = nginx.install
+	arch = x86_64
+	license = custom
+	depends = pcre
+	depends = zlib
+	depends = openssl
+	depends = geoip
+	depends = mailcap
+	provides = nginx
+	conflicts = nginx
+	backup = etc/nginx/fastcgi.conf
+	backup = etc/nginx/fastcgi_params
+	backup = etc/nginx/koi-win
+	backup = etc/nginx/koi-utf
+	backup = etc/nginx/nginx.conf
+	backup = etc/nginx/scgi_params
+	backup = etc/nginx/uwsgi_params
+	backup = etc/nginx/win-utf
+	backup = etc/logrotate.d/nginx
+	source = https://nginx.org/download/nginx-1.12.2.tar.gz
+	source = https://github.com/arut/nginx-rtmp-module/archive/v1.2.1.tar.gz
+	source = service
+	source = logrotate
+	md5sums = 4d2fc76211435f029271f1cf6d7eeae3
+	md5sums = 639ac2b78103adaccbcfe484a92acf44
+	md5sums = ef491e760e7c1ffec9ca25441a150c83
+	md5sums = 6a01fb17af86f03707c8ae60f98a2dc2
+
+pkgname = nginx-rtmp
+
